@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-    - TEST_ENV: hello
+      TEST_ENV: hello
     steps:
     - uses: actions/checkout@v2
 
