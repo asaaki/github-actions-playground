@@ -7,32 +7,31 @@ on:
     branches: [ master ]
 
 jobs:
-  job_one:
+
+  # prerequisite job (use "needs" on all jobs to use the output)
+  sha_generator_job:
     runs-on: ubuntu-latest
     outputs:
-      static_output_one: "value-from-one"
-      from_step_one: ${{ steps.step1.outputs.result }}
-    env:
-      TEST_ENV: hello
+      short_sha: ${{ steps.sha_gen.outputs.short_sha }}
     steps:
     - uses: actions/checkout@v2
-    - id: step1
-      name: Read an env var
+    - id: sha_gen
+      name: Generate a short SHA
       run: |
-        echo "TEST_ENV is ${TEST_ENV}"
-        echo "::set-output name=result::${TEST_ENV}"
+        export SHORT_SHA=${GITHUB_SHA::8}
+        # OR: export SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8)
+        echo "::set-output name=short_sha::${SHORT_SHA}"
 
-  job_two:
+  main_job:
     runs-on: ubuntu-latest
-    needs: job_one
+    # this job must depend on the other!
+    needs: sha_generator_job
     env:
-      JOB_ONE_DATA: ${{needs.job_one.outputs.from_step_one}}
+      # sets the env var for all steps:
+      SHORT_SHA: ${{ needs.sha_generator_job.outputs.short_sha }}
     steps:
     - uses: actions/checkout@v2
-    - name: Read values from job_one
+    # Now you can use it everywhere
+    - name: Use short sha in jobs
       run: |
-        echo "=> static_output_one: ${{needs.job_one.outputs.static_output_one}}"
-        echo "=> from_step_one: ${{needs.job_one.outputs.from_step_one}}"
-    - name: "Can it be used to set env vars on the job?"
-      run: |
-        echo "JOB_ONE_DATA => ${JOB_ONE_DATA}"
+        echo "Short SHA calculated from job_one is: ${SHORT_SHA}"
