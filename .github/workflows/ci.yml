@@ -34,4 +34,4 @@ jobs:
     - name: Use short sha in jobs
       run: |
         echo "Short SHA calculated from job_one is: ${SHORT_SHA}"
-    -run: make ci
+    - run: make ci
