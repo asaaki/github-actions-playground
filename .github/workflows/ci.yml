@@ -12,15 +12,14 @@ jobs:
   sha_generator_job:
     runs-on: ubuntu-latest
     outputs:
+      # elevate step output to job output
       short_sha: ${{ steps.sha_gen.outputs.short_sha }}
     steps:
     - uses: actions/checkout@v2
+    # id is important for usage above
     - id: sha_gen
       name: Generate a short SHA
-      run: |
-        export SHORT_SHA=${GITHUB_SHA::8}
-        # OR: export SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8)
-        echo "::set-output name=short_sha::${SHORT_SHA}"
+      run: echo "::set-output name=short_sha::${GITHUB_SHA::8}"
 
   main_job:
     runs-on: ubuntu-latest
